@@ -52,26 +52,17 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 220px; /* גובה מינימלי לכרטיס כדי להכיל תמונה */
+            min-height: 160px; /* גובה מינימלי לכרטיס כדי לשמור על אחידות */
         }
         .item:hover {
             transform: translateY(-8px); /* קפיצה בולטת יותר בריחוף */
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* צל מודגש יותר בריחוף */
         }
-        .item-image {
-            width: 100%; /* התמונה תמלא את רוחב הכרטיס */
-            max-height: 120px; /* גובה מקסימלי לתמונה */
-            object-fit: contain; /* שומר על יחס הגובה-רוחב ומכיל בתוך המסגרת */
-            border-radius: 5px; /* פינות מעוגלות לתמונה */
-            margin-bottom: 15px; /* רווח מתחת לתמונה */
-            background-color: #e0e6ed; /* רקע לתמונה אם היא קטנה יותר מהמסגרת */
-            padding: 5px; /* ריפוד קל לתמונה */
-        }
         .item h2 {
             margin-top: 0;
             color: #3498db; /* כחול בהיר יותר לכותרת הכרטיס */
             font-size: 1.8em; /* כותרת הכרטיס גדולה יותר */
-            margin-bottom: 10px; /* רווח מתחת לכותרת */
+            margin-bottom: 15px;
             font-weight: 500; /* פחות מודגש מהכותרת הראשית */
         }
         .item .link-wrapper {
@@ -140,12 +131,11 @@
         // *** אלו עודכנו עבור הגיליון שלך! ***
         const SPREADSHEET_ID = '16O2ZM0l59ulhdZuZjblQ4-M3bcLIoEp1y1At5t_io08';
         // !!! וודא ששם הטאב בגיליון Google Sheets שלך הוא "דף האתרים שלי" בדיוק כפי שכתוב כאן !!!
-        const RANGE = 'דף האתרים שלי!A:C'; // הטווח הורחב לכלול את עמודה C
+        const RANGE = 'דף האתרים שלי!A:B'; 
 
         // אינדקסים של עמודות (0-based)
         const COLUMN_NAME = 0; // עמודה A
         const COLUMN_LINK = 1; // עמודה B
-        const COLUMN_IMAGE = 2; // עמודה C - חדש לתמונה
 
         // משתנה לאחסון הנתונים האחרונים שנטענו, כדי למנוע ריענון מיותר
         let lastFetchedDataHash = '';
@@ -208,39 +198,15 @@
                 dataRows.forEach(row => {
                     const cells = row.c;
                     
-                    // וודא שיש מספיק תאים בשורה עבור שם וקישור. קישור לתמונה הוא אופציונלי
                     if (cells && cells[COLUMN_NAME] && cells[COLUMN_NAME].v && cells[COLUMN_LINK] && cells[COLUMN_LINK].v) {
                         const name = cells[COLUMN_NAME].v;
                         const link = cells[COLUMN_LINK].v;
-                        
-                        let imageUrl = '';
-                        // נסה לקחת תמונה מעמודה C קודם
-                        if (cells[COLUMN_IMAGE] && cells[COLUMN_IMAGE].v) {
-                            imageUrl = cells[COLUMN_IMAGE].v;
-                        } 
-                        
-                        // אם אין תמונה בעמודה C, נסה ליצור קישור לפאביקון באמצעות שירות של גוגל
-                        if (!imageUrl) {
-                            try {
-                                const urlObject = new URL(link);
-                                const domain = urlObject.hostname; // חלץ את הדומיין מהקישור
-                                imageUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`; // גודל 64px לפאביקון
-                            } catch (e) {
-                                console.warn("Could not parse domain for favicon:", link, e);
-                                imageUrl = ''; // אם לא הצלחנו לחלץ דומיין, אל תציג תמונה
-                            }
-                        }
 
                         const itemDiv = document.createElement('div');
                         itemDiv.classList.add('item');
 
-                        let imageHtml = '';
-                        if (imageUrl) { // אם קיים קישור לתמונה, צור את תגית התמונה
-                            imageHtml = `<img src="${imageUrl}" alt="${name} image" class="item-image">`;
-                        }
-
                         itemDiv.innerHTML = `
-                            ${imageHtml} <h2>${name}</h2>
+                            <h2>${name}</h2>
                             <div class="link-wrapper">
                                 <a href="${link}" target="_blank">לכניסה לאתר</a>
                             </div>
